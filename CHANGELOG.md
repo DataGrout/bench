@@ -4,6 +4,22 @@ Bench is an application, not a library: versions mark what a build can do,
 and nothing here is a compatibility promise to other code. The crates in this
 workspace are not published.
 
+## [0.1.1] - 2026-09-14
+
+### Fixed
+
+- **The trigger rolled on noisy signals as if it were off.** It chose the
+  newest complete edge every frame, and on a signal with dense crossings (a
+  noise floor at full scale, a tone buried in noise) there is always a fresh
+  edge just before that boundary, so the display tracked live and the toggle
+  had no visible effect. A sweep now runs to its end before the trigger
+  re-arms, and the next sweep starts at the first edge after it: a periodic
+  signal stands still, a noisy one steps sweep by sweep, and a held edge that
+  has left the ring re-acquires near live. Edge selection moved to
+  `bench_core::trigger` with tests that reproduce the roll.
+- Smart Panel tool refs use the gateway's canonical names,
+  `smart-panels.list` and `smart-panels.publish`.
+
 ## [0.1.0] - 2026-09-14
 
 Initial public release. A DSP workbench that runs on DataGrout, and the

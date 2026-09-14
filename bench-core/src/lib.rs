@@ -34,6 +34,7 @@ pub mod ring;
 pub mod session;
 pub mod source;
 pub mod spec;
+pub mod trigger;
 
 pub use auth::{sign_in, Credentials, Progress};
 pub use chain::{Chain, Encoding, Output, Shape, Step, StepDef, StepResult};

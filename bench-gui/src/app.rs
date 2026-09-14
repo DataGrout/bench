@@ -214,9 +214,10 @@ pub struct BenchApp {
     /// Where the right edge of the view actually was this frame, behind live.
     /// Equals `view_back` unless the trigger repositioned the view.
     display_back: usize,
-    /// Absolute sample index of the last trigger alignment. When no new edge
-    /// is found the view holds this position, like a scope in normal trigger
-    /// mode, instead of falling back to rolling.
+    /// Absolute sample index of the edge the sweep on screen starts at. The
+    /// trigger re-arms only for edges after this sweep ends; until one is
+    /// complete the view holds here, like a scope in normal trigger mode,
+    /// instead of rolling. See `bench_core::trigger`.
     trigger_hold: Option<u64>,
     /// Why the last run produced no results, shown over the previous ones.
     last_run_error: Option<String>,
@@ -694,52 +695,44 @@ impl BenchApp {
         self.display_back + (self.frame_back - self.view_back)
     }
 
-    /// Find the trigger-aligned position for the live view.
+    /// The trigger-aligned position for the live view: how far behind live
+    /// the view's right edge should sit, or `None` to roll.
     ///
-    /// Scans recent samples for the newest rising crossing of the signal's
-    /// midpoint (with hysteresis) that leaves room for a full view with the
-    /// edge a tenth of the way in. Returns how far behind live the view's right
-    /// edge should sit, or `None` when nothing crosses — a flat or DC signal —
-    /// in which case the view rolls.
-    fn find_trigger(&self) -> Option<usize> {
+    /// The sweep on screen is held in `trigger_hold` (the edge's absolute
+    /// sample index) and the trigger re-arms only for edges after that sweep
+    /// ends — see `bench_core::trigger` for why "the newest edge every frame"
+    /// rolls on any signal with dense crossings. A held edge that has scrolled
+    /// out of the ring is dropped and the trigger acquires afresh near live.
+    fn trigger_reference(&mut self) -> Option<usize> {
         let view = self.view_samples;
         let pre = view / 10;
         let post = view - pre;
+        let written = self.ring.written();
+        let available = self.ring.available();
         // Look back at least half a second: a 2 Hz component has no edge
         // inside a 4096-sample view, and a search that short would roll.
         let search = (view * 3).max(self.source.sample_rate() as usize / 2);
         let buf = self.ring.latest(search);
         if buf.len() < view {
+            self.trigger_hold = None;
             return None;
         }
-        let (lo, hi, sum) = buf
-            .iter()
-            .fold((f32::MAX, f32::MIN, 0.0f64), |(lo, hi, sum), s| {
-                (lo.min(*s), hi.max(*s), sum + *s as f64)
-            });
-        let range = hi - lo;
-        if range < 1e-4 {
-            return None;
-        }
-        // The mean, not the midpoint of the extremes: a single noise spike
-        // moves the midpoint, and an asymmetric wave crosses its mean once per
-        // cycle where it may cross the midpoint several times.
-        let level = (sum / buf.len() as f64) as f32;
-        let hyst = range * 0.1;
+        let base = written - buf.len() as u64;
 
-        let mut armed = false;
-        let mut edge = None;
-        for (i, s) in buf.iter().enumerate() {
-            if *s < level - hyst {
-                armed = true;
-            } else if armed && *s >= level + hyst {
-                armed = false;
-                if i >= pre && i + post <= buf.len() {
-                    edge = Some(i);
-                }
-            }
+        let held = self
+            .trigger_hold
+            .filter(|abs| written.saturating_sub(*abs) <= available as u64);
+        if held.is_none() {
+            self.trigger_hold = None;
         }
-        edge.map(|t| buf.len() - (t + post))
+        let arm_from = held.map(|abs| abs + post as u64);
+        if let Some(edge) = bench_core::trigger::select_edge(&buf, base, pre, post, arm_from) {
+            self.trigger_hold = Some(edge);
+        }
+
+        let abs = self.trigger_hold?;
+        let back = written.checked_sub(abs + post as u64)? as usize;
+        (back + view <= available).then_some(back)
     }
 
     /// Anything in flight that the user is waiting on.
@@ -888,21 +881,9 @@ impl eframe::App for BenchApp {
             // is the horizontal-position offset from it — so a drag moves the
             // held waveform along instead of switching the display to rolling.
             // Untriggered (or nothing to trigger on), the offset is from live.
-            let written = self.ring.written() as usize;
             let available = self.ring.available();
             let reference = if self.trigger && self.running {
-                match self.find_trigger() {
-                    Some(back) => {
-                        self.trigger_hold = Some((written - back) as u64);
-                        Some(back)
-                    }
-                    // No edge right now: hold the last aligned position while
-                    // the ring still has it, rather than lurching into a roll.
-                    None => self.trigger_hold.and_then(|abs| {
-                        let back = written.checked_sub(abs as usize)?;
-                        (back + self.view_samples <= available).then_some(back)
-                    }),
-                }
+                self.trigger_reference()
             } else {
                 self.trigger_hold = None;
                 None
