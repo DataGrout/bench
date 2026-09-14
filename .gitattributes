@@ -1,0 +1,7 @@
+# Text files are LF in the working tree on every platform. The example
+# profiles are compiled into the binary with include_str!, so a CRLF checkout
+# would ship different bytes on Windows than on macOS or Linux.
+* text=auto eol=lf
+
+*.png binary
+*.wav binary

@@ -411,7 +411,14 @@ mod tests {
             let chain = p.chain().unwrap_or_else(|e| panic!("{}: {e}", b.slug));
             assert!(!chain.is_empty(), "{} has no chain", b.slug);
             // Stored as formatted, so a diff of the file is a diff of the setup.
-            assert_eq!(b.json, p.to_json(), "{} is not in canonical form", b.slug);
+            // Line endings are the checkout's business, not the format's: a
+            // Windows clone with autocrlf hands `include_str!` CRLF bytes.
+            assert_eq!(
+                b.json.replace("\r\n", "\n"),
+                p.to_json(),
+                "{} is not in canonical form",
+                b.slug
+            );
         }
     }
 

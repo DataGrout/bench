@@ -1,5 +1,8 @@
 # Bench
 
+[![CI](https://github.com/DataGrout/bench/actions/workflows/ci.yml/badge.svg)](https://github.com/DataGrout/bench/actions/workflows/ci.yml)
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](#license)
+
 A DSP workbench that runs on [DataGrout](https://datagrout.ai).
 
 Bench is a real bench instrument: live scope, meter, spectrum, and a
@@ -8,11 +11,16 @@ deterministic application on the DataGrout gateway and as a visual way to
 test and verify the signal and linalg suites. The only DG primitives used
 are the ones needed by a given instrument.
 
-![Bench: a 440 Hz tone with its third harmonic on the scope, the analysis frame shaded; below it the causal low-pass output with its stated 31-sample delay, and the spectrum with the filter's cutoff drawn as a draggable line at 4.80 kHz. The chain and its arguments sit on the right, above the meter.](docs/bench.png)
+<p align="center">
+  <img src="docs/bench.png" alt="Bench: a 440 Hz tone with its third harmonic on the scope, the analysis frame shaded; below it the causal low-pass output with its stated 31-sample delay, and the spectrum with the filter's cutoff drawn as a draggable line at 4.80 kHz. The chain and its arguments sit on the right, above the meter." width="900">
+  <br>
+  <em>The <a href="bench-core/examples/profiles/two-tone-spectrum.bench">two-tone spectrum</a> profile, one Analyse after launch. <code>dgbench --profile bench-core/examples/profiles/two-tone-spectrum.bench</code> opens Bench in this state.</em>
+</p>
 
-*The [two-tone spectrum](bench-core/examples/profiles/two-tone-spectrum.bench) profile, one
-Analyse after launch. `dgbench --profile bench-core/examples/profiles/two-tone-spectrum.bench`
-opens Bench in this state.*
+**How the work is split.** Everything in the left box runs locally at frame
+rate and never touches the network. DataGrout sees one captured frame at a
+time, only when you ask, and hands back the per-step results, the facts for
+the logic cell, and, if you save the chain, a skill with a certificate.
 
 ```mermaid
 flowchart LR
