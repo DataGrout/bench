@@ -71,10 +71,10 @@ pub mod tools {
     pub const LOGIC_QUERY: &str = "data-grout@1/logic.query@1";
     pub const TOOLSMITH_INVOKE: &str = "data-grout@1/toolsmith.invoke@1";
     pub const REACTOR_EXPOSE: &str = "data-grout@1/reactor.expose@1";
-    pub const SMART_PANEL_PUBLISH: &str = "data-grout@1/smart_panel.publish@1";
+    pub const SMART_PANEL_PUBLISH: &str = "data-grout@1/smart-panels.publish@1";
     /// Every panel with props, field ids and a row preview in one call — the
     /// intended way to load Smart Panels.
-    pub const SMART_PANEL_LIST: &str = "data-grout@1/smart_panel.list@1";
+    pub const SMART_PANEL_LIST: &str = "data-grout@1/smart-panels.list@1";
     /// The raw-fetch path for a cached (headed) result. Pages are stamped
     /// `_no_head`, so they bypass the inline size clamp.
     pub const PRISM_PAGINATE: &str = "data-grout@1/prism.paginate@1";
