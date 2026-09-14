@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+
+jobs:
+  check:
+    name: ${{ matrix.os }} ${{ matrix.features }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Windows needs no package step: cpal uses WASAPI and TLS is rustls.
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        features: ["", "--features audio"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: System libraries (Linux GUI + audio)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libxkbcommon-dev libwayland-dev libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libgtk-3-dev
+      - uses: Swatinem/rust-cache@v2
+      - name: Format
+        run: cargo fmt --all --check
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets ${{ matrix.features }} -- -D warnings
+      - name: Test
+        run: cargo test --workspace ${{ matrix.features }}
+
+  hygiene:
+    name: Publication hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: No internal paths or personal data
+        run: |
+          ! grep -rniE "lib/data_grout|/Users/|selecthub|BENCH-INTERNAL" --include="*.rs" --include="*.md" --include="*.toml" --exclude-dir=.github --exclude-dir=target .

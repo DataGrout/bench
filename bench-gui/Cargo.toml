@@ -1,0 +1,32 @@
+[package]
+name = "bench-gui"
+description = "Bench — a DSP workbench that runs on DataGrout."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+publish = false
+
+# `dgbench` rather than `bench`: the app is called Bench, but a binary named
+# `bench` sits next to `cargo bench` in every shell history.
+[[bin]]
+name = "dgbench"
+path = "src/main.rs"
+
+[dependencies]
+bench-core = { path = "../bench-core" }
+bench-serve = { path = "../bench-serve" }
+datagrout-panels = { workspace = true }
+datagrout-panels-egui = { workspace = true }
+
+eframe = { workspace = true }
+egui = { workspace = true }
+anyhow = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+
+[features]
+default = []
+audio = ["bench-core/audio"]

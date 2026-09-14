@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "name": "Regime embedding",
+  "description": "Two tones 12 Hz apart beat once every 83 ms, which is one scope window. A 20-sample delay embedding turns the frame into a trajectory matrix and PCA reduces it: the explained-variance bars show how many components the beat actually needs, which is the question a regime detector asks.",
+  "source": {
+    "kind": "synth",
+    "sample_rate": 48000.0,
+    "tones": [
+      {
+        "wave": "sine",
+        "freq_hz": 440.0,
+        "amplitude": 0.5,
+        "enabled": true
+      },
+      {
+        "wave": "sine",
+        "freq_hz": 452.0,
+        "amplitude": 0.5,
+        "enabled": true
+      }
+    ],
+    "noise": 0.0
+  },
+  "chain": [
+    {
+      "key": "signal.embed",
+      "args": {
+        "dimension": "20",
+        "stride": "1"
+      }
+    },
+    {
+      "key": "linalg.pca",
+      "args": {
+        "k": "4"
+      }
+    }
+  ],
+  "instrument": {
+    "view_samples": 4096,
+    "capture_samples": 2048,
+    "trigger": true,
+    "clock_rate": 1.0,
+    "analysis_hz": 1.0
+  }
+}

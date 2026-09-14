@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "name": "Square through causal filter",
+  "description": "A 1 kHz square wave into a 63-tap causal low-pass at 2.4 kHz: only the fundamental passes, so a square goes in and a sine comes out, 31 samples late. The step summary states the delay; the spectrum shows the odd harmonics the filter removed.",
+  "source": {
+    "kind": "synth",
+    "sample_rate": 48000.0,
+    "tones": [
+      {
+        "wave": "square",
+        "freq_hz": 1000.0,
+        "amplitude": 0.8,
+        "enabled": true
+      }
+    ],
+    "noise": 0.0
+  },
+  "chain": [
+    {
+      "key": "signal.filter",
+      "args": {
+        "causal": "true",
+        "cutoff": "0.05",
+        "num_taps": "63",
+        "type": "lowpass"
+      }
+    },
+    {
+      "key": "signal.spectral",
+      "args": {
+        "sample_rate": "48000",
+        "top_peaks": "5",
+        "window": "hann"
+      }
+    }
+  ],
+  "instrument": {
+    "view_samples": 1024,
+    "capture_samples": 2048,
+    "trigger": true,
+    "clock_rate": 1.0,
+    "analysis_hz": 1.0
+  }
+}

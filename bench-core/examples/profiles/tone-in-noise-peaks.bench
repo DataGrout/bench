@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "name": "Tone in noise peaks",
+  "description": "A 1 kHz tone at a fifth of the noise floor's amplitude. Two biquad low-pass stages at 1.4 kHz pull it out, and the peak finder counts its cycles: with a 30-sample minimum spacing the rate reads about 1000 per second, which is the tone recovered from noise you cannot see it in.",
+  "source": {
+    "kind": "synth",
+    "sample_rate": 48000.0,
+    "tones": [
+      {
+        "wave": "sine",
+        "freq_hz": 1000.0,
+        "amplitude": 0.2,
+        "enabled": true
+      }
+    ],
+    "noise": 0.6
+  },
+  "chain": [
+    {
+      "key": "signal.iir",
+      "args": {
+        "cutoff": "0.03",
+        "stages": "2",
+        "type": "lowpass"
+      }
+    },
+    {
+      "key": "signal.peaks",
+      "args": {
+        "distance": "30",
+        "sample_rate": "48000",
+        "valleys": "false"
+      }
+    }
+  ],
+  "instrument": {
+    "view_samples": 2048,
+    "capture_samples": 2048,
+    "trigger": false,
+    "clock_rate": 1.0,
+    "analysis_hz": 1.0
+  }
+}

@@ -1,0 +1,21 @@
+[package]
+name = "bench-serve"
+description = "Local HTTP surface over a DataGrout logic cell: /api/query, /api/action, /skills/:slug."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+publish = false
+
+# Extraction candidate: this crate is written against the `DgClient` trait only,
+# never a concrete client, so it can move to a standalone crate once its HTTP
+# contract settles. Keep it that way — a dependency on a specific client is what
+# would make it unshareable.
+[dependencies]
+bench-core = { path = "../bench-core" }
+anyhow = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true, features = ["net", "io-util"] }
+tracing = { workspace = true }

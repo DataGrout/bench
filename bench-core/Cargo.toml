@@ -1,0 +1,32 @@
+[package]
+name = "bench-core"
+description = "Bench engine: signal sources, ring buffer, DSP chain compiler, DG client."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+datagrout-conduit = { workspace = true, features = ["authcode-loopback"] }
+datagrout-panels = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+# Same major as conduit's, so `reqwest::Client` is one type across the boundary.
+reqwest = { version = "0.11", default-features = false, features = ["rustls-tls"] }
+
+# WAV read/write for captures and replay. Pure Rust, so always on.
+hound = "3"
+
+# Optional sources. Default features stay empty so a fresh clone builds with no
+# system audio libraries present — an example app should compile on first try.
+cpal = { version = "0.15", optional = true }
+
+[features]
+default = []
+audio = ["dep:cpal"]

@@ -1,0 +1,47 @@
+[workspace]
+resolver = "2"
+members = [
+    "bench-core",
+    "bench-gui",
+    "bench-serve",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.82"
+authors = ["DataGrout"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/DataGrout/bench"
+homepage = "https://datagrout.ai"
+
+[workspace.dependencies]
+datagrout-panels = "0.2.1"
+datagrout-panels-egui = "0.2.1"
+
+# Browser sign-in (`authcode-loopback`) shipped in conduit 0.8.0, so the
+# gateway client comes from crates.io like everything else. To develop against
+# a local conduit checkout, add a `[patch.crates-io]` entry rather than
+# editing this line.
+datagrout-conduit = "0.8.1"
+
+anyhow = "1"
+thiserror = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time"] }
+tracing = "0.1"
+
+# UI. egui and the panel renderer must agree on a version — a split here
+# surfaces as confusing trait-mismatch errors, so pin both together.
+eframe = { version = "0.29", default-features = false, features = ["default_fonts", "glow"] }
+egui = "0.29"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+
+# The scope redraws from the ring buffer every frame; a debug-profile FFT or
+# resampler is the difference between 60fps and a slideshow.
+[profile.dev.package."*"]
+opt-level = 2

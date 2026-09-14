@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "name": "Two-tone spectrum",
+  "description": "A 440 Hz tone with its third harmonic at 15% over a low noise floor, through a causal low-pass into a spectrum. The meter reads THD from the harmonic; drag the cutoff line on the spectrum to move the filter and watch the harmonic go.",
+  "source": {
+    "kind": "synth",
+    "sample_rate": 48000.0,
+    "tones": [
+      {
+        "wave": "sine",
+        "freq_hz": 440.0,
+        "amplitude": 1.0,
+        "enabled": true
+      },
+      {
+        "wave": "sine",
+        "freq_hz": 1320.0,
+        "amplitude": 0.15,
+        "enabled": true
+      }
+    ],
+    "noise": 0.01
+  },
+  "chain": [
+    {
+      "key": "signal.filter",
+      "args": {
+        "causal": "true",
+        "cutoff": "0.1",
+        "num_taps": "63",
+        "type": "lowpass"
+      }
+    },
+    {
+      "key": "signal.spectral",
+      "args": {
+        "sample_rate": "48000",
+        "top_peaks": "5",
+        "window": "hann"
+      }
+    }
+  ],
+  "instrument": {
+    "view_samples": 4096,
+    "capture_samples": 2048,
+    "trigger": true,
+    "clock_rate": 1.0,
+    "analysis_hz": 1.0
+  }
+}

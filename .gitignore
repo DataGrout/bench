@@ -1,0 +1,18 @@
+# Build output
+/target
+**/*.rs.bk
+*.pdb
+
+# Sign-in lives in ~/.config/bench/credentials.json, outside the repo, but a
+# local override or a stray copy must never be committed: it holds OAuth tokens.
+/.bench
+bench.local.toml
+credentials.json
+
+# Captures are data, not source. Bench writes them under ~/Documents/Bench by
+# default; anything saved into the repo while testing stays out of it.
+captures/
+*.wav
+
+# macOS
+.DS_Store
